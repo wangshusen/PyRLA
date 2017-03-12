@@ -25,5 +25,8 @@ The output file is "YearPredictionMSD.npy"
 Here are some examples.
 
 * Matrix sketching
-  * "sketch/demo/demo_rft.py": matrix coherence after the randomized Fourier transform (RFT) gets much smaller.
-  * "sketch/demo/demo_sketch.py": apply SRFT, count sketch, and leverage score sampling to matrix multiplication and compare their errors.
+  * "sketch/demo/demo\_rft.py": matrix coherence after the randomized Fourier transform (RFT) gets much smaller.
+  * "sketch/demo/demo\_sketch.py": apply SRFT, count sketch, and leverage score sampling to matrix multiplication and compare their errors.
+
+* Optimization
+  * "optimization/demo/demo\_precondition\_cg": the converge of CG with/without preconditioning.
