@@ -26,11 +26,42 @@ def col_lev(a_mat):
     _ , _, v_mat = numpy.linalg.svd(a_mat, full_matrices=False)
     lev_vec = numpy.sum(v_mat ** 2, axis=0)
     return lev_vec
+
+def barplot1(vec1, vec2):
+    # bar plots of the leverage scores
+    idx = numpy.arange(n_int)
+    fig = plt.figure(figsize=(14,7))
+    
+    ax1 = fig.add_subplot(211)
+    ax1.bar(idx, vec1, color='b', edgecolor='b')
+    ax1.axis([0, n_int, 0, 1])
+    plt.xticks(fontsize=20)
+    plt.yticks(fontsize=20)
+    plt.xlabel('indices', fontsize=24)
+    plt.ylabel('leverage scores', fontsize=22)
+    plt.title('Before Randomized Fourier Transform', color='b', fontsize=26)
+    
+    ax2 = fig.add_subplot(212)
+    ax2.bar(idx, vec2, color='r', edgecolor='r')
+    ax2.axis([0, n_int, 0, 1])
+    plt.xticks(fontsize=20)
+    plt.yticks(fontsize=20)
+    plt.xlabel('indices', fontsize=24)
+    plt.ylabel('leverage scores', fontsize=22)
+    plt.title('After Randomized Fourier Transform', color='r', fontsize=26)
+    
+    plt.tight_layout(pad=1.0)
+    
+    fig.savefig(PyRLA_dir + 'output/rft_leverage' + '.pdf', format='pdf', dpi=1200)
+    plt.show()
+
         
 if __name__ == '__main__':
+    n_int = 2000 # do not exceed #rows of rawdata_mat
+    
     # load real-world data
     rawdata_mat = numpy.load(PyRLA_dir + 'data/YearPredictionMSD.npy', mmap_mode='r')
-    rawdata_mat = rawdata_mat[0:2000, :]
+    rawdata_mat = rawdata_mat[0:n_int, :]
     x_mat = rawdata_mat[:, 1:].T
     m_int, n_int = x_mat.shape
 
@@ -55,21 +86,6 @@ if __name__ == '__main__':
     print('After the randomized Fourier transform,')
     print('the column coherence is ' + str(c_coherence))
     
-    # bar plots of the leverage scores
-    idx = numpy.arange(n_int)
-    fig = plt.figure()
-    ax1 = fig.add_subplot(211)
-    ax1.bar(idx, lev_x_vec, color='b', edgecolor='b')
-    ax1.axis([0, n_int, 0, 1])
-    plt.xlabel('indices')
-    plt.ylabel('leverage score')
-    plt.title('leverage scores (before randomized Fourier transform)', color='b')
-    ax2 = fig.add_subplot(212)
-    ax2.bar(idx, lev_c_vec, color='r', edgecolor='r')
-    ax2.axis([0, n_int, 0, 1])
-    plt.xlabel('indices')
-    plt.ylabel('leverage score')
-    plt.title('leverage scores (after randomized Fourier transform)', color='r')
-    plt.tight_layout(h_pad=1.0)
-    plt.show()
+
+    barplot1(lev_x_vec, lev_c_vec)
     
