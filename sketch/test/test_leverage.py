@@ -43,7 +43,7 @@ class TestCountSketch(unittest.TestCase):
         oversampling_int = 2
         err = 0
         for i in range(repeat):
-            lev_approx_vec = lev.lev_approx(x_mat, oversampling_int)
+            lev_approx_vec = lev.lev_approx(x_mat, sketch_size=oversampling_int)
             ratio_vec = lev_approx_vec / lev_exact_vec
             err += max(ratio_vec) / min(ratio_vec)
         err1 = err / repeat
@@ -52,7 +52,7 @@ class TestCountSketch(unittest.TestCase):
         oversampling_int = 4
         err = 0
         for i in range(repeat):
-            lev_approx_vec = lev.lev_approx(x_mat, oversampling_int)
+            lev_approx_vec = lev.lev_approx(x_mat, sketch_size=oversampling_int)
             ratio_vec = lev_approx_vec / lev_exact_vec
             err += max(ratio_vec) / min(ratio_vec)
         err2 = err / repeat
@@ -61,7 +61,7 @@ class TestCountSketch(unittest.TestCase):
         oversampling_int = 10
         err = 0
         for i in range(repeat):
-            lev_approx_vec = lev.lev_approx(x_mat, oversampling_int)
+            lev_approx_vec = lev.lev_approx(x_mat, sketch_size=oversampling_int)
             ratio_vec = lev_approx_vec / lev_exact_vec
             err += max(ratio_vec) / min(ratio_vec)
         err3 = err / repeat
@@ -72,7 +72,7 @@ class TestCountSketch(unittest.TestCase):
         
     def test_approx_lev_score_bigm(self):
         # approximate leverage scores
-        lev_approx_vec = lev.lev_approx_bigm(x_mat)
+        lev_approx_vec = lev.lev_approx_fast(x_mat)
         print('Approx leverage scores (with Gaussian projection): max=' + str(max(lev_approx_vec)) + '   min=' + str(min(lev_approx_vec)))
         self.assertEqual(len(lev_approx_vec), n_int)
         
@@ -81,7 +81,7 @@ class TestCountSketch(unittest.TestCase):
         oversampling_int = 2
         err = 0
         for i in range(repeat):
-            lev_approx_vec = lev.lev_approx_bigm(x_mat, oversampling_int)
+            lev_approx_vec = lev.lev_approx_fast(x_mat, sketch_size=oversampling_int)
             ratio_vec = lev_approx_vec / lev_exact_vec
             err += max(ratio_vec) / min(ratio_vec)
         err1 = err / repeat
@@ -90,7 +90,7 @@ class TestCountSketch(unittest.TestCase):
         oversampling_int = 4
         err = 0
         for i in range(repeat):
-            lev_approx_vec = lev.lev_approx_bigm(x_mat, oversampling_int)
+            lev_approx_vec = lev.lev_approx_fast(x_mat, sketch_size=oversampling_int)
             ratio_vec = lev_approx_vec / lev_exact_vec
             err += max(ratio_vec) / min(ratio_vec)
         err2 = err / repeat
@@ -99,7 +99,7 @@ class TestCountSketch(unittest.TestCase):
         oversampling_int = 10
         err = 0
         for i in range(repeat):
-            lev_approx_vec = lev.lev_approx_bigm(x_mat, oversampling_int)
+            lev_approx_vec = lev.lev_approx_fast(x_mat, sketch_size=oversampling_int)
             ratio_vec = lev_approx_vec / lev_exact_vec
             err += max(ratio_vec) / min(ratio_vec)
         err3 = err / repeat

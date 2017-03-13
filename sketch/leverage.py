@@ -1,17 +1,14 @@
 import numpy
-import sys
-
-PyRLA_dir = '../../'
-sys.path.append(PyRLA_dir)
 
 import sketch.countsketch as cs
+import sketch.srft as srft
 
 def lev_exact(a_mat):
     '''
     Compute Exact Column Leverage Scores
     
     Input
-        a_mat: m-by-n dense matrix A.
+        a_mat: m-by-n dense matrix A (n >> m).
     
     Output
         lev_vec: n-dim vector containing the exact leverage scores
@@ -23,28 +20,38 @@ def lev_exact(a_mat):
     
 
     
-def lev_approx(a_mat, oversampling_int=5):
+def lev_approx(a_mat, sketch_size=5, sketch_type='count'):
     '''
-    Compute Approximate Exact Column Leverage Scores
+    Compute Approximate Column Leverage Scores
     
     Input
-        a_mat: m-by-n dense matrix A;
-        oversampling_int: over-sampling parameter (big over-sampling parameter leads to higher cost and better accuracy).
+        a_mat: m-by-n dense matrix A (n >> m);
+        sketch_size: a real number bigger than 1 (s = sketch_size * m)
+        sketch_type: 'count' or 'srft';
+                    'count' for count sketch;
+                    'srft' for subsampled randomized Fourier transform;
+                    'uniform' for uniform sampling.
     
     Output
         lev_vec: n-dim vector containing the approximate leverage scores
         
     Procedure
-        1. sketch size: s_int = m_int * oversampling_int
-        2. draw m-by-s sketch B = A * S, where S is n-by-s count sketch matrix
+        1. sketch size: s_int = m_int * sketch_size
+        2. draw m-by-s sketch B = A * S, where S is n-by-s sketching matrix
         3. compute the SVD B = U * Sig * V
         4. let T = Sig^{-1} * U^T
         5. Y = T * A
         6. return the n column leverage scores of Y
     '''
     m_int, n_int = a_mat.shape
-    s_int = min(m_int * oversampling_int, int(n_int / 2))
-    b_mat = cs.countsketch(a_mat, s_int)
+    s_int = int(m_int * sketch_size)
+    if sketch_type == 'count':
+        b_mat = cs.countsketch(a_mat, s_int)
+    elif sketch_type == 'srft':
+        b_mat = srft.srft(a_mat, s_int)
+    elif sketch_type == 'uniform':
+        idx_vec = numpy.random.choice(n_int, s_int, replace=False)
+        b_mat = a_mat[:, idx_vec] * (n_int / s_int)
     u_mat, sig_vec, _ = numpy.linalg.svd(b_mat, full_matrices=False)
     t_mat = u_mat.T / sig_vec.reshape(len(sig_vec), 1)
     y_mat = numpy.dot(t_mat, a_mat)
@@ -52,35 +59,42 @@ def lev_approx(a_mat, oversampling_int=5):
     return lev_vec
 
 
-def lev_approx_bigm(a_mat, oversampling_int=5):
+def lev_approx_fast(a_mat, sketch_size=5, sketch_type='count', speedup=2):
     '''
     Compute Approximate Exact Column Leverage Scores
     
     This algorithm is useful only if m_int is big
     
     Input
-        a_mat: m-by-n dense matrix A;
-        oversampling_int: over-sampling parameter (big over-sampling parameter leads to higher cost and better accuracy).
+        a_mat: m-by-n dense matrix A (n >> m);
+        sketch_size: a real number bigger than 1 (s = sketch_size * m)
+        sketch_type: 'count' or 'srft';
+                    'count' for count sketch;
+                    'srft' for subsampled randomized Fourier transform;
+        speedup: a real number bigger than 1.
     
     Output
         lev_vec: n-dim vector containing the approximate leverage scores
         
     Procedure
-        1. sketch size: s_int = m_int * oversampling_int
+        1. sketch size: s_int = m_int * sketch_size
         2. draw m-by-s sketch B = A * S, where S is n-by-s count sketch matrix
         3. compute the SVD B = U * Sig * V
         4. let T = Sig^{-1} * U^T
-        5. let p = O(log n) and generate p-by-m Gaussian projection matrix P
+        5. let p = m / speedup and generate p-by-m Gaussian projection matrix P
         5. Y = (P * T) * A
         6. return the n column leverage scores of Y
     '''
     m_int, n_int = a_mat.shape
     
     # p_int must be smaller than m_int
-    p_int = int(m_int / 2) # can be tuned
+    p_int = int(m_int / speedup)
     
-    s_int = min(m_int * oversampling_int, int(n_int / 2))
-    b_mat = cs.countsketch(a_mat, s_int)
+    s_int = min(m_int * sketch_size, int(n_int / 2))
+    if sketch_type == 'count':
+        b_mat = cs.countsketch(a_mat, s_int)
+    elif sketch_type == 'srft':
+        b_mat = srft.srft(a_mat, s_int)
     u_mat, sig_vec, _ = numpy.linalg.svd(b_mat, full_matrices=False)
     t_mat = u_mat.T / sig_vec.reshape(len(sig_vec), 1)
     
