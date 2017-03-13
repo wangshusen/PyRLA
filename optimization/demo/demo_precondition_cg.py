@@ -16,11 +16,11 @@ def demo_cg_converge(x_mat, y_vec, sketch_type):
     # ================= optimal solution ================= #
     w_opt_vec = numpy.dot(numpy.linalg.pinv(x_mat), y_vec)
 
-    # ============= CG without precondition ============= #
+    # ============= CG without precondition ============== #
     # CG without precondition
     err_vec = cg.demo_cg(x_mat, y_vec, w_opt_vec)[2]
 
-    # ===========#=== CG with precondition ====#========== #
+    # =============== CG with precondition =============== #
     # preconditioning matrix is computed by using s=1.2d
     t_mat = cg_cond.precondition(x_mat, sketch_type=sketch_type, sketch_size=1.2)
     err_cond1_vec = cg_cond.demo_cg_cond(x_mat, y_vec, t_mat, w_opt_vec)[2]
